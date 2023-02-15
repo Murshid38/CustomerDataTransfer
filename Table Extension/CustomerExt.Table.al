@@ -2,14 +2,10 @@ tableextension 50101 CustomerExt extends Customer
 {
     trigger OnAfterInsert()
     begin
-        Company.SetFilter(Name, '<>CRONUS International Ltd.');
-        Company.FindSet();
+        GetDataTransferCompanies();
         repeat
-            ChangeCompanyCustomer.ChangeCompany(Company.Name);
-            CompanyInformation.ChangeCompany(Company.Name);
-            CompanyInformation.Get();
+            ChangeCompanyAndInformation();
             if CompanyInformation."Data Transfer From Chronus" then begin
-                ChangeCompanyCustomer.LockTable();
                 ChangeCompanyCustomer.Init();
                 ChangeCompanyCustomer.TransferFields(Rec);
                 ChangeCompanyCustomer.Insert();
@@ -20,14 +16,10 @@ tableextension 50101 CustomerExt extends Customer
 
     trigger OnAfterModify()
     begin
-        Company.SetFilter(Name, '<>CRONUS International Ltd.');
-        Company.FindSet();
+        GetDataTransferCompanies();
         repeat
-            ChangeCompanyCustomer.ChangeCompany(Company.Name);
-            CompanyInformation.ChangeCompany(Company.Name);
-            CompanyInformation.Get();
+            ChangeCompanyAndInformation();
             if CompanyInformation."Data Transfer From Chronus" then begin
-                ChangeCompanyCustomer.LockTable();
                 ChangeCompanyCustomer.Get(Rec."No.");
                 ChangeCompanyCustomer.TransferFields(Rec);
                 ChangeCompanyCustomer.Modify();
@@ -38,14 +30,10 @@ tableextension 50101 CustomerExt extends Customer
 
     trigger OnAfterDelete()
     begin
-        Company.SetFilter(Name, '<>CRONUS International Ltd.');
-        Company.FindSet();
+        GetDataTransferCompanies();
         repeat
-            ChangeCompanyCustomer.ChangeCompany(Company.Name);
-            CompanyInformation.ChangeCompany(Company.Name);
-            CompanyInformation.Get();
+            ChangeCompanyAndInformation();
             if CompanyInformation."Data Transfer From Chronus" then begin
-                ChangeCompanyCustomer.LockTable();
                 ChangeCompanyCustomer.Get(Rec."No.");
                 ChangeCompanyCustomer.Delete();
             end;
@@ -53,21 +41,19 @@ tableextension 50101 CustomerExt extends Customer
         Message('Deletion is Successful');
     end;
 
-    // local procedure IsEnabledDataTransfer(): Boolean
-    // begin
-    //     if CompanyInformation.Get() then
-    //         if CompanyInformation."Data Transfer From Chronus" then
-    //             exit(true)
-    //         else
-    //             exit(false);
-    // end;
+    local procedure GetDataTransferCompanies()
+    begin
+        Company.SetFilter(Name, '<>CRONUS International Ltd.');
+        Company.FindSet();
+    end;
 
-    // local procedure ChooseDataTransferCompany()
-    // begin
-    //     Company.SetFilter(Name, '<>CRONUS International Ltd.');
-    //     Company.FindSet();
-    // end;
-    //why this findset not working for OnAfterInsert trigger?
+    local procedure ChangeCompanyAndInformation()
+    begin
+        ChangeCompanyCustomer.ChangeCompany(Company.Name);
+        ChangeCompanyCustomer.LockTable();
+        CompanyInformation.ChangeCompany(Company.Name);
+        CompanyInformation.Get();
+    end;
 
     var
         ChangeCompanyCustomer: Record Customer;

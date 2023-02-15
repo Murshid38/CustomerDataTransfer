@@ -2,14 +2,10 @@ tableextension 50102 "Document Attachment Ext" extends "Document Attachment"
 {
     trigger OnAfterInsert()
     begin
-        Company.SetFilter(Name, '<>CRONUS International Ltd.');
-        Company.FindSet();
+        GetDataTransferCompanies();
         repeat
-            ChangeCompanyAttachment.ChangeCompany(Company.Name);
-            CompanyInformation.ChangeCompany(Company.Name);
-            CompanyInformation.Get();
+            ChangeCompanyAndInformation();
             if CompanyInformation."Data Transfer From Chronus" then begin
-                ChangeCompanyAttachment.LockTable();
                 ChangeCompanyAttachment.Init();
                 ChangeCompanyAttachment.TransferFields(Rec);
                 ChangeCompanyAttachment.Insert();
@@ -20,14 +16,10 @@ tableextension 50102 "Document Attachment Ext" extends "Document Attachment"
 
     trigger OnAfterDelete()
     begin
-        Company.SetFilter(Name, '<>CRONUS International Ltd.');
-        Company.FindSet();
+        GetDataTransferCompanies();
         repeat
-            ChangeCompanyAttachment.ChangeCompany(Company.Name);
-            CompanyInformation.ChangeCompany(Company.Name);
-            CompanyInformation.Get();
+            ChangeCompanyAndInformation();
             if CompanyInformation."Data Transfer From Chronus" then begin
-                ChangeCompanyAttachment.LockTable();
                 ChangeCompanyAttachment.Get(Rec."Table ID", Rec."No.", Rec."Document Type", Rec."Line No.", Rec.ID);
                 ChangeCompanyAttachment.Delete();
             end;
@@ -42,6 +34,20 @@ tableextension 50102 "Document Attachment Ext" extends "Document Attachment"
                 exit(true)
             else
                 exit(false);
+    end;
+
+    local procedure GetDataTransferCompanies()
+    begin
+        Company.SetFilter(Name, '<>CRONUS International Ltd.');
+        Company.FindSet();
+    end;
+
+    local procedure ChangeCompanyAndInformation()
+    begin
+        ChangeCompanyAttachment.ChangeCompany(Company.Name);
+        ChangeCompanyAttachment.LockTable();
+        CompanyInformation.ChangeCompany(Company.Name);
+        CompanyInformation.Get();
     end;
 
     var
