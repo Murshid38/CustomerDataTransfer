@@ -1,87 +1,76 @@
 tableextension 50101 CustomerExt extends Customer
 {
     trigger OnAfterInsert()
-    var
-        CurrentCompanyCustomer: Record Customer;
-        ChangeCompanyCustomer: Record Customer;
     begin
-        if IsEnabledDataTransferForDemo1() then begin
-            ChangeCompanyCustomer.ChangeCompany('Demo 1');
-            ChangeCompanyCustomer.Init();
-            ChangeCompanyCustomer.TransferFields(Rec);
-            ChangeCompanyCustomer.Insert();
-            Message('Insertion to Demo 1 is successful!');
-        end;
-
-        if IsEnabledDataTransferForDemo2() then begin
-            ChangeCompanyCustomer.ChangeCompany('Demo 2');
-            ChangeCompanyCustomer.Init();
-            ChangeCompanyCustomer.TransferFields(Rec);
-            ChangeCompanyCustomer.Insert();
-            Message('Insertion to Demo 2 is successful!');
-        end;
+        Company.SetFilter(Name, '<>CRONUS International Ltd.');
+        Company.FindSet();
+        repeat
+            ChangeCompanyCustomer.ChangeCompany(Company.Name);
+            CompanyInformation.ChangeCompany(Company.Name);
+            CompanyInformation.Get();
+            if CompanyInformation."Data Transfer From Chronus" then begin
+                ChangeCompanyCustomer.LockTable();
+                ChangeCompanyCustomer.Init();
+                ChangeCompanyCustomer.TransferFields(Rec);
+                ChangeCompanyCustomer.Insert();
+            end;
+        until Company.Next() = 0;
+        Message('Insertion is Successful');
     end;
 
     trigger OnAfterModify()
-    var
-        CurrentCompanyCustomer: Record Customer;
-        ChangeCompanyCustomer: Record Customer;
     begin
-        if IsEnabledDataTransferForDemo1() then begin
-            ChangeCompanyCustomer.ChangeCompany('Demo 1');
-            ChangeCompanyCustomer.Get(Rec."No.");
-            ChangeCompanyCustomer.TransferFields(Rec);
-            ChangeCompanyCustomer.Modify();
-            Message('Modification to Demo 1 is successful!');
-        end;
-
-        if IsEnabledDataTransferForDemo2() then begin
-            ChangeCompanyCustomer.ChangeCompany('Demo 2');
-            ChangeCompanyCustomer.Get(Rec."No.");
-            ChangeCompanyCustomer.TransferFields(Rec);
-            ChangeCompanyCustomer.Modify();
-            Message('Modification to Demo 2 is successful!');
-        end;
+        Company.SetFilter(Name, '<>CRONUS International Ltd.');
+        Company.FindSet();
+        repeat
+            ChangeCompanyCustomer.ChangeCompany(Company.Name);
+            CompanyInformation.ChangeCompany(Company.Name);
+            CompanyInformation.Get();
+            if CompanyInformation."Data Transfer From Chronus" then begin
+                ChangeCompanyCustomer.LockTable();
+                ChangeCompanyCustomer.Get(Rec."No.");
+                ChangeCompanyCustomer.TransferFields(Rec);
+                ChangeCompanyCustomer.Modify();
+            end;
+        until Company.Next() = 0;
+        Message('Modification is Successful');
     end;
 
     trigger OnAfterDelete()
+    begin
+        Company.SetFilter(Name, '<>CRONUS International Ltd.');
+        Company.FindSet();
+        repeat
+            ChangeCompanyCustomer.ChangeCompany(Company.Name);
+            CompanyInformation.ChangeCompany(Company.Name);
+            CompanyInformation.Get();
+            if CompanyInformation."Data Transfer From Chronus" then begin
+                ChangeCompanyCustomer.LockTable();
+                ChangeCompanyCustomer.Get(Rec."No.");
+                ChangeCompanyCustomer.Delete();
+            end;
+        until Company.Next() = 0;
+        Message('Deletion is Successful');
+    end;
+
+    // local procedure IsEnabledDataTransfer(): Boolean
+    // begin
+    //     if CompanyInformation.Get() then
+    //         if CompanyInformation."Data Transfer From Chronus" then
+    //             exit(true)
+    //         else
+    //             exit(false);
+    // end;
+
+    // local procedure ChooseDataTransferCompany()
+    // begin
+    //     Company.SetFilter(Name, '<>CRONUS International Ltd.');
+    //     Company.FindSet();
+    // end;
+    //why this findset not working for OnAfterInsert trigger?
+
     var
-        CurrentCompanyCustomer: Record Customer;
         ChangeCompanyCustomer: Record Customer;
-    begin
-        if IsEnabledDataTransferForDemo1() then begin
-            ChangeCompanyCustomer.ChangeCompany('Demo 1');
-            ChangeCompanyCustomer.Get(Rec."No.");
-            ChangeCompanyCustomer.Delete();
-            Message('Deletion in Demo 1 is successfull');
-        end;
-
-        if IsEnabledDataTransferForDemo2() then begin
-            ChangeCompanyCustomer.ChangeCompany('Demo 2');
-            ChangeCompanyCustomer.Get(Rec."No.");
-            ChangeCompanyCustomer.Delete();
-            Message('Deletion in Demo 2 is successfull');
-        end;
-    end;
-
-    local procedure IsEnabledDataTransferForDemo1(): Boolean
-    begin
-        if CompanyInformation.Get() then
-            if CompanyInformation."Data Transfer For Demo 1" then
-                exit(true)
-            else
-                exit(false);
-    end;
-
-    local procedure IsEnabledDataTransferForDemo2(): Boolean
-    begin
-        if CompanyInformation.Get() then
-            if CompanyInformation."Data Transfer For Demo 2" then
-                exit(true)
-            else
-                exit(false);
-    end;
-
-    var
+        Company: Record Company;
         CompanyInformation: Record "Company Information";
 }

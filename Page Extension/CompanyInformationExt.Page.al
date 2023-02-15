@@ -5,12 +5,7 @@ pageextension 50100 "Company Information Ext" extends "Company Information"
     {
         addafter(Picture)
         {
-            field("Data Transfer For Demo 1"; Rec."Data Transfer For Demo 1")
-            {
-                ApplicationArea = All;
-                Visible = IsVisible;
-            }
-            field("Data Transfer For Demo 2"; Rec."Data Transfer For Demo 2")
+            field("Data Transfer From Chronus"; Rec."Data Transfer From Chronus")
             {
                 ApplicationArea = All;
                 Visible = IsVisible;
@@ -21,9 +16,9 @@ pageextension 50100 "Company Information Ext" extends "Company Information"
     trigger OnOpenPage()
     begin
         if Rec.Name = 'CRONUS International Ltd.' then
-            IsVisible := true
+            IsVisible := false
         else
-            IsVisible := false;
+            IsVisible := true;
     end;
 
     var
